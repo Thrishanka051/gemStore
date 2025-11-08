@@ -1,0 +1,431 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Premium gemstones and jewelry from around the world.">
+  <title>Gemstone Emporium - Home</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Swiper.js for Hero Slider -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+  <!-- AOS for Scroll Animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <style>
+    /* Custom Styles */
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .hover-scale {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-scale:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .sold-out {
+      background-color: #ff0000;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+    .swiper-slide img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+    /* Smooth Scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+		/* Ensure Swiper takes full height of slides */
+	.my-swiper-hero {
+	  height: 60vh !important;
+	  overflow: hidden;
+	}
+
+	/* Optional: Adjust pagination position */
+	.my-swiper-hero .swiper-pagination-bullet {
+	  background: white;
+	  opacity: 0.7;
+	}
+	.my-swiper-hero .swiper-pagination-bullet-active {
+	  opacity: 1;
+	  background: #FFD700;
+	}
+
+	/* Navigation arrows */
+	.my-swiper-hero .swiper-button-prev,
+	.my-swiper-hero .swiper-button-next {
+	  width: 40px;
+	  height: 40px;
+	  background: rgba(0, 0, 0, 0.5);
+	  border-radius: 50%;
+	}
+	.my-swiper-hero .swiper-button-prev:after,
+	.my-swiper-hero .swiper-button-next:after {
+	  font-size: 18px;
+	}
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <!-- Header -->
+  <header class="bg-navy-900 text-white fixed top-0 w-full z-50 shadow-md" data-aos="fade-down">
+    <nav class="container mx-auto flex items-center justify-between p-4">
+      <!-- Logo -->
+      <a href="/" class="text-2xl font-bold">Gemstone Emporium</a>
+      <!-- Menu -->
+      <div class="hidden md:flex space-x-6">
+        <a href="/" class="hover:text-gold-500">Home</a>
+        <div class="relative group">
+          <button class="hover:text-gold-500">Shop</button>
+          <div class="absolute hidden group-hover:block bg-white text-gray-800 shadow-lg rounded-md mt-2">
+            <a href="/sapphires" class="block px-4 py-2 hover:bg-gray-100">Sapphires</a>
+            <a href="/rubies" class="block px-4 py-2 hover:bg-gray-100">Rubies</a>
+            <a href="/jewelry" class="block px-4 py-2 hover:bg-gray-100">Jewelry</a>
+          </div>
+        </div>
+        <a href="/about" class="hover:text-gold-500">About</a>
+        <a href="/blog" class="hover:text-gold-500">Blog</a>
+        <a href="/contact" class="hover:text-gold-500">Contact</a>
+      </div>
+      <!-- Icons -->
+      <div class="flex items-center space-x-4">
+        <input type="text" placeholder="Search..." class="hidden md:block bg-white text-gray-800 p-2 rounded" aria-label="Search">
+        <a href="/account" aria-label="Account"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></a>
+        <a href="/wishlist" aria-label="Wishlist"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></a>
+        <a href="/cart" aria-label="Cart"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM2 4h1l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0020.01 4H5.21l-.94-2H2v2z"/></svg><span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-2">0</span></a>
+      </div>
+      <!-- Hamburger Menu (Mobile) -->
+      <button id="menu-toggle" class="md:hidden" aria-label="Toggle Menu"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg></button>
+    </nav>
+    <!-- Mobile Menu (Hidden by Default) -->
+    <div id="mobile-menu" class="hidden md:hidden bg-navy-900 text-white p-4">
+      <a href="/" class="block py-2">Home</a>
+      <a href="/shop" class="block py-2">Shop</a>
+      <a href="/about" class="block py-2">About</a>
+      <a href="/blog" class="block py-2">Blog</a>
+      <a href="/contact" class="block py-2">Contact</a>
+    </div>
+  </header>
+
+  <!-- Hero Slider -->
+  <!-- Hero Slider -->
+<section class="mt-16 swiper my-swiper-hero" data-aos="fade-up">
+  <div class="swiper-wrapper">
+    <!-- Slide 1 -->
+    <div class="swiper-slide relative">
+      <img 
+        src="https://satvikgems.com/wp-content/uploads/2024/08/Blue-Sapphire-Neelam-Benefits-Price-Guide-Quality.jpg" 
+        alt="Blue Sapphire" 
+        class="w-full h-full object-cover"
+      >
+      <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-center px-4">
+        <div>
+          <h1 class="text-4xl md:text-6xl font-bold">Exquisite Natural Gemstones</h1>
+          <p class="mt-2 text-lg">Sourced from Sri Lanka</p>
+          <a href="/shop" class="mt-4 inline-block bg-yellow-500 text-blue-900 px-6 py-3 rounded hover:bg-yellow-400 transition">Shop Now</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="swiper-slide relative">
+      <img 
+        src="https://t4.ftcdn.net/jpg/05/94/01/15/360_F_594011500_SJVK4c2y3tse4UAcmdAway91QTsLgeCV.jpg" 
+        alt="Emerald Ring" 
+        class="w-full h-full object-cover"
+      >
+      <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-center px-4">
+        <div>
+          <h1 class="text-4xl md:text-6xl font-bold">Timeless Jewelry Designs</h1>
+          <p class="mt-2 text-lg">Crafted with Precision</p>
+          <a href="/jewelry" class="mt-4 inline-block bg-yellow-500 text-blue-900 px-6 py-3 rounded hover:bg-yellow-400 transition">Explore Jewelry</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination inside the slide (no extra space below) -->
+  <div class="swiper-pagination !bottom-6"></div>
+  <div class="swiper-button-prev !text-white"></div>
+  <div class="swiper-button-next !text-white"></div>
+</section>
+
+  <!-- Featured Products -->
+  <section class="container mx-auto py-12" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-center mb-8">Latest Arrivals</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <!-- Product Card -->
+      <div class="bg-white rounded-lg shadow hover-scale relative">
+        <img src="https://images.unsplash.com/photo-1613843351058-1dd06fda7c02?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074" alt="3.09ct Blue Sapphire" class="w-full h-48 object-cover rounded-t-lg">
+        <span class="sold-out">Sold Out</span>
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">3.09ct Natural Blue Sapphire</h3>
+          <p class="text-gray-600">Sri Lanka</p>
+          <p class="text-gold-500 font-bold">$5,450.00</p>
+          <button class="mt-2 w-full bg-navy-900 text-white py-2 rounded opacity-50" disabled>Add to Cart</button>
+        </div>
+      </div>
+      <!-- Repeat for other products (sample) -->
+      <div class="bg-white rounded-lg shadow hover-scale">
+        <img src="https://media.istockphoto.com/id/540512180/photo/natural-blue-sapphire.webp?a=1&b=1&s=612x612&w=0&k=20&c=-AL1aY0baEv9vFldiMBCnmEoazFDMtd7XDN5jIky8SI=" alt="2.56ct Blue Sapphire" class="w-full h-48 object-cover rounded-t-lg">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">2.56ct Natural Blue Sapphire</h3>
+          <p class="text-gray-600">Sri Lanka</p>
+          <p class="text-gold-500 font-bold">$3,600.00</p>
+          <button class="mt-2 w-full bg-navy-900 text-white py-2 rounded hover:bg-navy-800">Add to Cart</button>
+        </div>
+      </div>
+      <!-- Add more as needed -->
+    </div>
+    <div class="text-center mt-8">
+      <a href="/shop" class="inline-block bg-gold-500 text-navy-900 px-6 py-3 rounded hover:bg-gold-600">View More</a>
+    </div>
+  </section>
+
+  <!-- Product Categories -->
+  <section class="container mx-auto py-12 bg-white" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-center mb-8">Explore Our Collections</h2>
+    <div class="flex overflow-x-auto space-x-4 pb-4">
+      <a href="/sapphires" class="flex-none w-64 bg-gray-100 rounded-lg hover-scale">
+        <img src="https://cdn.shopify.com/s/files/1/0825/7459/files/sapphires_large.jpg?v=1505495510" alt="Sapphires" class="w-full h-40 object-cover rounded-t-lg">
+        <div class="p-4 text-center">Sapphires</div>
+      </a>
+      <a href="/rubies" class="flex-none w-64 bg-gray-100 rounded-lg hover-scale">
+        <img src="data:image/jpeg;base64,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" alt="Rubies" class="w-full h-40 object-cover rounded-t-lg">
+        <div class="p-4 text-center">Rubies</div>
+      </a>
+      <a href="/Emeralds" class="flex-none w-64 bg-gray-100 rounded-lg hover-scale">
+        <img src="https://astteria.com/cdn/shop/articles/istockphoto-157593127-1024x1024-transformed_12f22812-4b7f-4e4b-9af6-73d774a44cd9.jpg?v=1746262248" alt="Emeralds" class="w-full h-40 object-cover rounded-t-lg">
+        <div class="p-4 text-center">Emeralds</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Customer Reviews -->
+  <section class="container mx-auto py-12" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-center mb-8">What Our Customers Say</h2>
+    <div class="swiper reviews-swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center mb-4">
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </div>
+          <p>"Exceptional quality and service! Highly recommend for gem enthusiasts."</p>
+          <p class="mt-2 font-semibold">Abugam C.</p>
+        </div>
+        <div class="swiper-slide bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center mb-4">
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </div>
+          <p>"Stunning jewelry and professional staff. A must-visit store!"</p>
+          <p class="mt-2 font-semibold">Promit M.</p>
+        </div>
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
+    <div class="text-center mt-8">
+      <a href="/reviews" class="text-navy-900 hover:text-gold-500">View All Reviews</a>
+    </div>
+  </section>
+
+  <!-- About/Trust -->
+  <section class="container mx-auto py-12 bg-gray-50" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-center mb-8">Why Choose Us</h2>
+    <div class="flex flex-col md:flex-row items-center">
+      <div class="md:w-1/2 p-6">
+        <p>We source the finest natural gemstones from Sri Lanka and beyond, ensuring authenticity and quality. Our affiliations with GIA and SLGJA guarantee trust.</p>
+        <div class="flex space-x-4 mt-4">
+          <img src="https://via.placeholder.com/100?text=GIA" alt="GIA Logo" class="h-12">
+          <img src="https://via.placeholder.com/100?text=SLGJA" alt="SLGJA Logo" class="h-12">
+        </div>
+        <div class="mt-4 flex space-x-4">
+          <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">Certified Gems</span>
+          <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">Secure Payments</span>
+          <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">Worldwide Shipping</span>
+        </div>
+      </div>
+      <div class="md:w-1/2">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop" alt="Gemstone Collection" class="w-full h-64 object-cover rounded">
+      </div>
+    </div>
+  </section>
+
+  <!-- Store Location -->
+  <section class="container mx-auto py-12" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-center mb-8">Visit Us</h2>
+    <div class="flex flex-col md:flex-row items-center">
+      <div class="md:w-1/2 p-6">
+        <p>730 Galle Road, Colombo 03, Sri Lanka</p>
+        <a href="https://maps.google.com" target="_blank" class="text-navy-900 hover:text-gold-500">Get Directions</a>
+      </div>
+      <div class="md:w-1/2">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.902913716739!2d79.84968931477288!3d6.901922995003517!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2593f3c8b3f5d%3A0x4b7f3c7e7f3b7f3!2sGalle%20Rd%2C%20Colombo%2000300%2C%20Sri%20Lanka!5e0!3m2!1sen!2sus!4v1697041234567!5m2!1sen!2sus" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="container mx-auto py-12 bg-navy-900 text-white" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-center mb-8">Join Our Newsletter</h2>
+    <form id="newsletter-form" class="flex justify-center">
+      <input type="email" id="email" placeholder="Enter your email" class="p-2 rounded-l text-gray-800" aria-label="Email">
+      <button type="submit" class="bg-gold-500 text-navy-900 p-2 rounded-r hover:bg-gold-600">Subscribe</button>
+    </form>
+    <p id="form-message" class="text-center mt-4 hidden">Thank you for subscribing!</p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-navy-900 text-white py-12">
+    <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-lg font-bold mb-4">Gemstone Emporium</h3>
+        <p>919/1, Jewelry Trade Center, Bangkok, Thailand</p>
+        <p>+66 61 395 3588</p>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+        <a href="/" class="block hover:text-gold-500">Home</a>
+        <a href="/shop" class="block hover:text-gold-500">Shop</a>
+        <a href="/about" class="block hover:text-gold-500">About</a>
+        <a href="/contact" class="block hover:text-gold-500">Contact</a>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold mb-4">Follow Us</h3>
+        <div class="flex space-x-4">
+          <a href="#" aria-label="Instagram"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.148 3.227-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.148-4.771-1.691-4.919-4.919-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.332.014 7.052.072 3.668.227 1.981 1.914 1.826 5.298.014 8.332 0 8.741 0 12c0 3.259.014 3.668.072 4.948.215 3.383 1.902 5.071 5.286 5.226 1.28.058 1.689.072 4.948.072s3.668-.014 4.948-.072c3.384-.155 5.071-1.843 5.226-5.226.058-1.28.072-1.689.072-4.948s-.014-3.668-.072-4.948c-.155-3.384-1.843-5.071-5.226-5.226C15.668.014 15.259 0 12 0z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold mb-4">Contact</h3>
+        <p>Email: info@gemstock.org</p>
+      </div>
+    </div>
+    <div class="text-center mt-8">
+      <p>&copy; 2025 Gemstone Emporium. All rights reserved. | <a href="/privacy" class="hover:text-gold-500">Privacy Policy</a> | <a href="/terms" class="hover:text-gold-500">Terms</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize AOS
+    AOS.init();
+
+    // Initialize Swiper for Hero Slider
+    const heroSwiper = new Swiper('.my-swiper-hero', {
+	  loop: true,
+	  autoplay: {
+		delay: 5000,
+		disableOnInteraction: false,
+	  },
+	  pagination: {
+		el: '.swiper-pagination',
+		clickable: true,
+	  },
+	  navigation: {
+		nextEl: '.swiper-button-next',
+		prevEl: '.swiper-button-prev',
+	  },
+	  // Ensure height is respected
+	  autoHeight: false,
+	  height: '60vh',
+	});
+
+    // Initialize Swiper for Reviews
+    const reviewsSwiper = new Swiper('.reviews-swiper', {
+      loop: true,
+      slidesPerView: 1,
+      spaceBetween: 20,
+      pagination: { el: '.swiper-pagination', clickable: true },
+      breakpoints: {
+        640: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 },
+      },
+    });
+
+    // Mobile Menu Toggle
+    document.getElementById('menu-toggle').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Newsletter Form Validation
+    document.getElementById('newsletter-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('form-message');
+      if (/^\S+@\S+\.\S+$/.test(email)) {
+        message.classList.remove('hidden');
+        message.textContent = 'Thank you for subscribing!';
+        document.getElementById('email').value = '';
+      } else {
+        message.classList.remove('hidden');
+        message.textContent = 'Please enter a valid email.';
+      }
+    });
+
+    // Custom Tailwind Colors
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'navy-900': '#001F3F',
+            'gold-500': '#FFD700',
+          },
+        },
+      },
+    };
+  </script>
+</body>
+</html>
